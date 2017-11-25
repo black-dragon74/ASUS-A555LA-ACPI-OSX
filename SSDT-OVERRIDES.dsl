@@ -28,6 +28,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (_SB_.PCI0.EH01, DeviceObj)
     External (_SB_.PCI0.EH02, DeviceObj)
     External (\_SB.PCI0.GFX0, DeviceObj)
+    External (\_SB.PCI0.HDEF, DeviceObj)
     External (\_SB.PCI0.LPCB, DeviceObj)
     External (\_SB.PCI0.SIRC, DeviceObj)
     External (\_SB.PCI0.LPCB.ADBG, DeviceObj)
@@ -60,7 +61,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (IUSB, 1)  // Change this to 0 if you don't have ASUS A555LA || IUSB = Inject USB
         Name (PTYP, 1) // Processor Type: Use 1 for Hasw/Bdw || 2 for SKL/KBL || PTYP = Processor Type
         Name (BFXD, 1) // Set this to 0 if you have not applied the battery fix (Split registers larger than 8 bytes)
-        
+        Name (AUDL, 3) // Audio layout of your AppleHDA
         Method (_INI, 0)
         {
             Store ("Loaded Optimizer SSDT", Debug)
@@ -499,6 +500,48 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 })
             }
         }
+        
+        // Add audio device properties. Make sure you have renamed conflicting _DSM to XDSM in DSDT
+        Scope (HDEF)
+        {
+            Method (_DSM ,4)
+            {
+                If (!Arg2)
+                {
+                    Return (Buffer()
+                    {
+                        0x03
+                    })
+                }
+                
+                // Don't return the package, instead, store it in a variable
+                Local0 = Package()
+                {
+                    "layout-id", Buffer(4)
+                    {
+                        3, 0, 0, 0
+                    },
+                    "hda-gfx", Buffer()
+                    {
+                        "onboard-1"
+                    },
+                    "PinConfigurations", Buffer()
+                    {
+                        // Inject custom pin configuration if you want to
+                    },            
+                }
+                
+                // Read AUDL property and change layout-id buffer's value
+                If (CondRefOf(\ANKD.AUDL))
+                {
+                    CreateDWordField(DerefOf(Local0[1]), 0, AUDL)
+                    AUDL = \ANKD.AUDL
+                }
+                
+                // Return Local0 package (our device properties)
+                Return (Local0)                
+            }
+        }        
         
         // Add a new device and initialize it to put EHCI in D3hot state
         Device (DECI)
