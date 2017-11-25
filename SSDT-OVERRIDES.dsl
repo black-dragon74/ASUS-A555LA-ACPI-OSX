@@ -35,6 +35,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.LPCB.DMAC, DeviceObj)
     External (_SB_.PCI0.LPCB.EC0_.AH00, FieldUnitObj)
     External (_SB_.PCI0.LPCB.EC0_.AH01, FieldUnitObj)
+    External (_SB_.PCI0.LPCB.EC0_.TAH0, FieldUnitObj) // If the battery fix is not applied import 16 bit register
     External (\_SB.PCI0.LPCB.FWHD, DeviceObj)
     External (\_SB.PCI0.LPCB.IPIC, DeviceObj)
     External (\_SB.PCI0.LPCB.LDRC, DeviceObj)
@@ -58,6 +59,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Configurations for this SSDT, change according to your system
         Name (IUSB, 1)  // Change this to 0 if you don't have ASUS A555LA || IUSB = Inject USB
         Name (PTYP, 1) // Processor Type: Use 1 for Hasw/Bdw || 2 for SKL/KBL || PTYP = Processor Type
+        Name (BFXD, 1) // Set this to 0 if you have not applied the battery fix (Split registers larger than 8 bytes)
         
         Method (_INI, 0)
         {
@@ -516,6 +518,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     Device (SMCD)
     {
         Name (_HID, "FAN0000")
+        Name (_STA, 1) // Just so that we could turn device on and off as required
         Name (TACH, Package()
         {
             "System Fan", "FAN0"
@@ -523,7 +526,20 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Method (FAN0, 0)
         {
             Local3=2974 // Just to supress warnings
-            Store (B1B2 (\_SB.PCI0.LPCB.EC0.AH00, \_SB.PCI0.LPCB.EC0.AH01), Local0)
+            Store (\ANKD.BFXD, Local2)
+            If (Local2 == 1)
+            {
+                Store (B1B2 (\_SB.PCI0.LPCB.EC0.AH00, \_SB.PCI0.LPCB.EC0.AH01), Local0) // Read value from two 8 bit registers
+            }
+            ElseIf (Local2 == 0)
+            {
+                Store (\_SB.PCI0.LPCB.EC0.TAH0, Local0) // Read value from 16bit register
+            }
+            Else
+            {
+                Store (0, _STA) // Turn off the device
+            }
+                    
             If (LEqual (Local0, 0xFF))
             {
                 Store (Zero, Local0)
