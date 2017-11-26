@@ -244,11 +244,11 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                        
         }
         
-        // Disable bogus SBUS device
-        Scope (SBUS)
-        {
-            Name (_STA, Zero)
-        }
+        // Don't Disable bogus SBUS device
+        //Scope (SBUS)
+        //{
+        //    Name (_STA, Zero)
+        //}
         
         // Disable bogus TPCH Device
         // Method _STA renamed to XSTA in SSDT-5 (DptfTabl)
