@@ -35,6 +35,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.HECI, DeviceObj)
     External (\_SB.PCI0.LPCB, DeviceObj)
     External (\_SB.PCI0.SIRC, DeviceObj)
+    External (\_SB.PCI0.SMB0, DeviceObj) // Requires rename of BAT0 to SMB0
     External (\_SB.PCI0.LPCB.ADBG, DeviceObj)
     External (\_SB.PCI0.LPCB.CWDT, DeviceObj)
     External (\_SB.PCI0.LPCB.DMAC, DeviceObj)
@@ -69,6 +70,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (AUDL, 3) // Audio layout of your AppleHDA
         Name (IALS, 0) // Set this to 1 if you want to inject a fake ALS (Ambient Light Sensor) device
         Name (IPLT, 0) // Set this to 1 if you want to inject "plugin-type" on CPU0
+        Name (HSOA, 1) // Set this to 0 if you don't want to add FirstPollDelay for ACPIBatMgr || HSOA = High Sierra or above
         
         Method (_INI, 0)
         {
@@ -365,10 +367,24 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             
     Scope (\_SB.PCI0)
     {
+        // Make Apple ACPI Battery Manager load
         Scope (ADP1)
         {
             Name (_PRW, Package() { 0x18, 0x03 })
         }
+        
+        // Add FirstPollDelay for ACPIBatteryManager on HighSierra+
+        Scope (SMB0)
+        {
+            Store (\ANKD.HSOA, Local0)
+            If (Local0 == 1)
+            {
+                Name (RMCF, Package()
+                {
+                    "FirstPollDelay", 8000
+                })    
+            }    
+        }    
             
         Scope (RP03)
         {
