@@ -607,7 +607,21 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Device (MCHC)
         {
             Name (_ADR, 0)
-        }                                  
+        }
+        
+        // Add IMEI device
+        Device (IMEI)
+        {
+            Name(_ADR, 0x00160000) // From DSDT
+            
+            Method (_DSM, 4)
+            {
+                Return (Package()
+                {
+                    //
+                })
+            }        
+        }                                      
     }
     
     // Add methods to read FAN RPM in compliance to FakeSMC_ACPI_Sensors
