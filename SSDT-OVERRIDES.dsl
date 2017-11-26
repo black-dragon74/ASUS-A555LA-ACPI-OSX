@@ -587,7 +587,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 
                 Return (Local1)                       
             }
-        }                               
+        }
+        
+        // Add MCHC device
+        Device (MCHC)
+        {
+            Name (_ADR, 0)
+        }                                  
     }
     
     // Add methods to read FAN RPM in compliance to FakeSMC_ACPI_Sensors
