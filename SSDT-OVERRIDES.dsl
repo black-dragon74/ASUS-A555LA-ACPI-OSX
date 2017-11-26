@@ -501,6 +501,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             }
         }
         
+        // If your ACPI tables doesn't have HDEF device, uncomment the lines below
+        //Device(_SB.PCI0.HDEF)
+        //{
+        //    Name(_ADR, 0x001b0000)
+        //    Name(_PRW, Package() { 0x0d, 0x05 }) // may need tweaking (or not needed)
+        //}
+        
         // Add audio device properties. Make sure you have renamed conflicting _DSM to XDSM in DSDT
         Scope (HDEF)
         {
