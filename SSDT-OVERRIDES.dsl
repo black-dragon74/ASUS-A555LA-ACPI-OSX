@@ -607,6 +607,38 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 
                 Return (Local1)                       
             }
+            
+            // Add BUS0 device to SBUS (SMBUS) based on work by RehabMan
+            Device (BUS0)
+            {
+                Name (_CID, "smbus") // Just so it is compatible
+                Name (_ADR, 0) // Required
+                
+                // Add DVL0 device
+                Device (DVL0)
+                {
+                    Name (_ADR, 0x57) //Address is required
+                    Name (_CID, "diagsvault") // Compatible with Diag Vault
+                    
+                    // DSM method to inject properties
+                    Method (_DSM ,4)
+                    {
+                        If (!Arg2)
+                        {
+                            Return (Buffer()
+                            {
+                                0x03
+                            })
+                        }
+                        
+                        // Else return address
+                        Return (Package()
+                        {
+                            "address", 0x57
+                        })
+                    }
+                }                    
+            }    
         }
         
         // Add MCHC device
