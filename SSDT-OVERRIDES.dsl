@@ -337,7 +337,6 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             Name (_HID, "ACPI0008") // According to Apple
             Name (_CID, "smc-als") // According to Apple
             Name (_ALI, 300) // According to Apple and _ALR package
-            Name (_STA, 2) // We will set this using _INI
             Name (_ALR, Package()
             {
                 //Package() { 70, 0 },
@@ -348,18 +347,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             })
             
             // Read config from ANKD and enable/disable device accordingly
-            Method (_INI, 0)
+            If (CondRefOf(\ANKD.IALS))
             {
-                Store (\ANKD.IALS, Local0)
-                If (Local0 == 0)
+                If (\ANKD.IALS == 0)
                 {
-                    Store (0, _STA) // Disables the device
+                    Name (_STA, 0) // Turn off the device
                 }
-                Else
-                {
-                    Store (Local0, _STA) // Stores value of Local0 in _STA (Any other value than 0 means device is on)
-                }
-            }            
+            }                   
         }    
     }
             
