@@ -29,6 +29,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (_SB_.PCI0.EH02, DeviceObj)
     External (\_SB.PCI0.GFX0, DeviceObj)
     External (\_SB.PCI0.HDEF, DeviceObj)
+    External (\_SB.PCI0.HECI, DeviceObj)
     External (\_SB.PCI0.LPCB, DeviceObj)
     External (\_SB.PCI0.SIRC, DeviceObj)
     External (\_SB.PCI0.LPCB.ADBG, DeviceObj)
@@ -148,7 +149,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Scope (GFX0)
         {
             Name (_STA, Zero)
-        }                  
+        }
+        
+        // Disable HECI device, IMEI will be injected by this SSDT
+        Scope (HECI)
+        {
+            Name (_STA, Zero)
+        }                      
         
         Scope (RP03)
         {
