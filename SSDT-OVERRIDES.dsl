@@ -295,13 +295,11 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     Scope (\_PR.CPU0)
     {
         // Check if we have to inject
-        Store (\ANKD.IPLT, Local0)
-        If (Local0 != 0)
+        If (\ANKD.IPLT != 0)
         {
             // Inject only if processor is haswell or above
             // Not recommended of processor prior to haswell
-            Store (\ANKD.PTYP, Local1)
-            If (Local1 == 1 || Local1 == 2)
+            If (\ANKD.PTYP == 1 || \ANKD.PTYP == 2)
             {
                 Method (_DSM, 4)
                 {
@@ -376,8 +374,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Add FirstPollDelay for ACPIBatteryManager on HighSierra+
         Scope (SMB0)
         {
-            Store (\ANKD.HSOA, Local0)
-            If (Local0 == 1)
+            If (\ANKD.HSOA == 1)
             {
                 Name (RMCF, Package()
                 {
