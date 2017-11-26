@@ -554,7 +554,40 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 Store (3, ^^EH02.PSTE)
                 Store (1, ^^LPCB.FDE2)
             }
-        }                       
+        }
+        
+        // Add SMBUS device compatible properties
+        Scope (SBUS)
+        {
+            Method (_DSM, 4)
+            {
+                Store (\ANKD.PTYP, Local0)
+                If (!Arg2)
+                {
+                    Return (Buffer()
+                    {
+                        0x03
+                    })
+                }
+                
+                If (Local0 == 1)
+                {
+                    Local1 =  Package()
+                    {
+                        "compatible", "pci8086,9c43"
+                    }
+                }
+                ElseIf (Local0 ==2)
+                {
+                    Local1 = Package()
+                    {
+                        "compatible", "pci8086,9cc1",
+                    }
+                }
+                
+                Return (Local1)                       
+            }
+        }                               
     }
     
     // Add methods to read FAN RPM in compliance to FakeSMC_ACPI_Sensors
