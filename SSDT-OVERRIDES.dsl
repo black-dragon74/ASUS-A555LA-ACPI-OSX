@@ -1,4 +1,7 @@
 // Copyright: black.dragon74
+
+// Code is poetry
+
 // IMPORTANT: If you use sorted order, this SSDT should load immediately after OEM SSDTs
 
 // This SSDT is used to disable bogus devices that are not needed by macOS
