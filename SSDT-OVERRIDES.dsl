@@ -48,6 +48,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.PDRC, DeviceObj)
     External (\_SB.PCI0.SBUS, DeviceObj)
     External (\_SB.PCI0.TPCH, DeviceObj)
+    External (\_SB.PCI0.XHC, DeviceObj)
     External (\_SB.PCI0.RP03.PXSX, DeviceObj)
     External (\_SB.PCI0.RP03.GLAN, DeviceObj)
     External (\_SB.PCI0.RP04.PXSX, DeviceObj)
@@ -663,7 +664,34 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                     //
                 })
             }        
-        }                                      
+        }
+        
+        // Inject properties for XHCI controller
+        // Properties for EHCI are not injected as we have disabled the EHCI device
+        Scope (XHC)
+        {
+            Method (_DSM, 4)
+            {
+                If (!Arg2)
+                {
+                    Return (Buffer()
+                    {
+                        0x03
+                    })
+                }
+                
+                // Return properties
+                Return (Package()
+                {
+                    "subsystem-id", Buffer() { 0x70, 0x72, 0x00, 0x00 },
+                    "subsystem-vendor-id", Buffer() { 0x86, 0x80, 0x00, 0x00 },
+                    "AAPL,current-available", Buffer() { 0x34, 0x08, 0, 0 },
+                    "AAPL,current-extra", Buffer() { 0x98, 0x08, 0, 0, },
+                    "AAPL,current-extra-in-sleep", Buffer() { 0x40, 0x06, 0, 0, },
+                    "AAPL,max-port-current-in-sleep", Buffer() { 0x34, 0x08, 0, 0 },
+                })            
+            }
+        }                                              
     }
     
     // Add methods to read FAN RPM in compliance to FakeSMC_ACPI_Sensors
