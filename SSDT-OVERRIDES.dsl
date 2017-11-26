@@ -15,6 +15,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
 {
 
     External (B1B2, MethodObj)
+    External (\_PR.CPU0, DeviceObj)
     External (\_SB, DeviceObj)
     External (\_SB.ASHS, DeviceObj)
     External (\_SB.PCCD, DeviceObj)
@@ -66,6 +67,8 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (BFXD, 1) // Set this to 0 if you have not applied the battery fix (Split registers larger than 8 bytes)
         Name (AUDL, 3) // Audio layout of your AppleHDA
         Name (IALS, 0) // Set this to 1 if you want to inject a fake ALS (Ambient Light Sensor) device
+        Name (IPLT, 0) // Set this to 1 if you want to inject "plugin-type" on CPU0
+        
         Method (_INI, 0)
         {
             Store ("Loaded Optimizer SSDT", Debug)
@@ -283,6 +286,43 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     // End disabling devices
     
     // Start injecting new devices
+    // Inject plugin type 1 for native power management
+    // Set ANKD.IPLT to 0 if you are using ssdtprgen
+    // Set ANKD.IPLT to 0 if you are injecting plugi type in config.plist
+    Scope (\_PR.CPU0)
+    {
+        // Check if we have to inject
+        Store (\ANKD.IPLT, Local0)
+        If (Local0 != 0)
+        {
+            // Inject only if processor is haswell or above
+            // Not recommended of processor prior to haswell
+            Store (\ANKD.PTYP, Local1)
+            If (Local1 == 1 || Local1 == 2)
+            {
+                Method (_DSM, 4)
+                {
+                    If (!Arg2)
+                    {
+                        Return (Package()
+                        {
+                            0x03
+                        })
+                    }
+                
+                    Return (Package()
+                    {
+                        "plugin-type", 1
+                    })            
+                }
+            }                
+        }
+        Else
+        {
+            // Do nothing
+        }        
+    }        
+    
     Scope (\_SB)
     {
         Device (EC)
