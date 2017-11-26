@@ -8,6 +8,7 @@
 
 // Meant specifically for ASUS A555LA, but, might work for other laptops
 // _STA to XSTA renames required in DSDT & SSDTs: DptfTabl, CpccTabl, SaSSDT
+// Serach for "Renamed" in this file to see OEM TABLE ID of SSDT in which you have to apply renames
 
 // TODO: What this ssdt does
     
@@ -84,13 +85,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             Name (_STA, Zero)
         }
         
-        // Renamed _STA to XSTA in SSDT-5 (DptfTabl)
+        // Renamed _STA to XSTA in SSDT (DptfTabl)
         Scope (IETM)
         {
             Name (_STA, Zero)
         }
         
-        // Renamed _STA to XSTA in SSDT-6 (CpccTabl)
+        // Renamed _STA to XSTA in SSDT (CpccTabl)
         Scope (PCCD)
         {
             Name (_STA, Zero)
@@ -106,14 +107,14 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     Scope (\_SB.PCI0)
     {
         // Disable B0D3 Device, HDAU is injected by HaswHDA SSDT
-        // Method _STA renamed to XSTA in SSDT-8 (SaSSDT)
+        // Method _STA renamed to XSTA in SSDT (SaSSDT)
         Scope (B0D3)
         {
             Name (_STA, Zero)
         }
         
         // Disable bogus B0D4 device
-        // Method _STA renamed to XSTA in SSDT-5 (DptfTabl)
+        // Method _STA renamed to XSTA in SSDT (DptfTabl)
         Scope (B0D4)
         {
             Name (_STA, Zero)
@@ -264,7 +265,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         //}
         
         // Disable bogus TPCH Device
-        // Method _STA renamed to XSTA in SSDT-5 (DptfTabl)
+        // Method _STA renamed to XSTA in SSDT (DptfTabl)
         Scope (TPCH)
         {
             Name (_STA, Zero)
@@ -594,7 +595,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         //    Name(_PRW, Package() { 0x0d, 0x05 }) // may need tweaking (or not needed)
         //}
         
-        // Add audio device properties. Make sure you have renamed conflicting _DSM to XDSM in DSDT
+        // Add audio device properties. Make sure you have changed conflicting _DSM to XDSM in DSDT
         Scope (HDEF)
         {
             Method (_DSM ,4)
