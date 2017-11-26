@@ -21,6 +21,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.IETM, DeviceObj)
     External (\_SB.TPM, DeviceObj)
     External (\_SB.PCI0, DeviceObj)
+    Exteral (\_SB,PCI0.ADP1, DeviceObj) // Requires rename of AC0 to ADP1 in DSDT
     External (\_SB.PCI0.B0D3, DeviceObj)
     External (\_SB.PCI0.B0D4, DeviceObj)
     External (\_SB.PCI0.D02B, DeviceObj)
@@ -290,6 +291,11 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             
     Scope (\_SB.PCI0)
     {
+        Scope (ADP1)
+        {
+            Name (_PRW, Package() { 0x18, 0x03 })
+        }
+            
         Scope (RP03)
         {
             // Inject ethernet device with compliance to Apple
