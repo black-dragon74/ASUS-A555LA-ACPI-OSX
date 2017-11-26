@@ -65,6 +65,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (PTYP, 1) // Processor Type: Use 1 for Hasw/Bdw || 2 for SKL/KBL || PTYP = Processor Type
         Name (BFXD, 1) // Set this to 0 if you have not applied the battery fix (Split registers larger than 8 bytes)
         Name (AUDL, 3) // Audio layout of your AppleHDA
+        Name (IALS, 0) // Set this to 1 if you want to inject a fake ALS (Ambient Light Sensor) device
         Method (_INI, 0)
         {
             Store ("Loaded Optimizer SSDT", Debug)
@@ -288,6 +289,37 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         {
             Name (_HID, "EC000000")
         }
+        
+        // Inject ALS device
+        Device (ALS)
+        {
+            Name (_HID, "ACPI0008") // According to Apple
+            Name (_CID, "smc-als") // According to Apple
+            Name (_ALI, 300) // According to Apple and _ALR package
+            Name (_STA, 2) // We will set this using _INI
+            Name (_ALR, Package()
+            {
+                //Package() { 70, 0 },
+                //Package() { 73, 10 },
+                //Package() { 85, 80 },
+                Package() { 100, 300 },
+                //Package() { 150, 1000 },
+            })
+            
+            // Read config from ANKD and enable/disable device accordingly
+            Method (_INI, 0)
+            {
+                Store (\ANKD.IALS, Local0)
+                If (Local0 == 0)
+                {
+                    Store (0, _STA) // Disables the device
+                }
+                Else
+                {
+                    Store (Local0, _STA) // Stores value of Local0 in _STA (Any other value than 0 means device is on)
+                }
+            }            
+        }    
     }
             
     Scope (\_SB.PCI0)
