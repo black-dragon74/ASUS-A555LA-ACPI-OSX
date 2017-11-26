@@ -611,36 +611,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             
         // Add SMBUS device compatible properties
         Scope (SBUS)
-        {
-            Method (_DSM, 4)
-            {
-                Store (\ANKD.PTYP, Local0)
-                If (!Arg2)
-                {
-                    Return (Buffer()
-                    {
-                        0x03
-                    })
-                }
-                
-                If (Local0 == 1)
-                {
-                    Local1 =  Package()
-                    {
-                        "compatible", "pci8086,9c43"
-                    }
-                }
-                ElseIf (Local0 ==2)
-                {
-                    Local1 = Package()
-                    {
-                        "compatible", "pci8086,9cc1",
-                    }
-                }
-                
-                Return (Local1)                       
-            }
-            
+        {            
             // Add BUS0 device to SBUS (SMBUS) based on work by RehabMan
             Device (BUS0)
             {
