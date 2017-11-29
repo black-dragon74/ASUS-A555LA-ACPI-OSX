@@ -581,20 +581,31 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                     })
                 }
 
-                Return (Package (0x04)
+                Local0 = Package (0x04)
                 {
+                    "layout-id", 
+                    Buffer (4)
+                    {
+                         0x03, 0x00, 0x00, 0x00                         
+                    },
+
                     "hda-gfx", 
-                    Buffer (0x0A)
+                    Buffer ()
                     {
                         "onboard-1"
                     }, 
-
-                    "layout-id", 
-                    Buffer (0x04)
-                    {
-                         0x03, 0x00, 0x00, 0x00                         
-                    }
-                })
+                }
+                
+                // Read AUDL property and change layout-id buffer's value
+                // CondRefOf not really needed here, but, just in case.
+                If (CondRefOf(\ANKD.AUDL))
+                {
+                    CreateDWordField(DerefOf(Local0[1]), 0, AUDL)
+                    AUDL = \ANKD.AUDL
+                }
+                
+                // Return the package
+                Return (Local0)
             }
         }
         
