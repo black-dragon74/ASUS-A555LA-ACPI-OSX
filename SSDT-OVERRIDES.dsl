@@ -375,35 +375,46 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Add FirstPollDelay for ACPIBatteryManager on HighSierra+
         Scope (SMB0)
         {
-            If (\ANKD.HSOA == 1)
+            Method (RMCF, 0)
             {
-                Method (RMCF, 0)
+                Local0 = Package()
                 {
-                    Local0 = Package()
-                    {
-                        "FirstPollDelay", 4000
-                    }
+                    "FirstPollDelay", 4000
+                }
+                
+                // If CFPD exists, then change the value of FirstPollDelay wrt ANKD.CFPD
+                External (\ANKD.CFPD, IntObj)
+                If (CondRefOf(\ANKD.CFPD))
+                {
+                    CreateDWordField(DerefOf(Local0[1]), 0, CFPD)
+                    CFPD = \ANKD.CFPD
                     
-                    // If CFPD exists, then change the value of FirstPollDelay wrt ANKD.CFPD
-                    External (\ANKD.CFPD, IntObj)
-                    If (CondRefOf(\ANKD.CFPD))
+                    // A little bit of debug info
+                    Debug = "Injected custom FirstPollDelay for ACPIBatteryManager"
+                    Debug = \ANKD.CFPD
+                }
+                Else
+                {
+                    Debug = "Custom FirstPollDelay not found. Using default: 4000"
+                }    
+                
+                // Return the final package, by checking if running macOS 10.13+
+                If (CondRefOf(\ANKD.HSOA))
+                {
+                    If (\ANKD.HSOA == 1)
                     {
-                        CreateDWordField(DerefOf(Local0[1]), 0, CFPD)
-                        CFPD = \ANKD.CFPD
-                        
-                        // A little bit of debug info
-                        Debug = "Injected custom FirstPollDelay for ACPIBatteryManager"
-                        Debug = \ANKD.CFPD
+                        Return (Local0)
                     }
                     Else
                     {
-                        Debug = "Custom FirstPollDelay not found. Using default: 4000"
-                    }    
-                    
-                    // Return the final package
-                    Return (Local0)
+                        Return (0)
+                    }
+                }
+                Else
+                {
+                    Return (0)
                 }        
-            }    
+            }           
         }    
             
         Scope (RP03)
