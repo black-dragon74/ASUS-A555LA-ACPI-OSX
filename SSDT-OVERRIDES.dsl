@@ -854,132 +854,123 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     Device (UIAC)
     {
         Name (_HID, "UIA00000")
-        
-        // Read value of ANKD.IUSB and turn device on/off accordingly
-        Method (_STA, 0)
+        // So that UIAC is not turned off on machines other than A555LA
+        Name (_STA, 1)
+        // If A555LA, inject custom USB mappings
+        If (\ANKD.IUSB == 1)
         {
-            Store (\ANKD.IUSB, Local0)
-            If (Local0 == 1)
+            Name (RMCF, Package ()
             {
-                Return (1)
-            }
-            Else
-            {
-                Return (0)
-            }                  
-        }
-        
-        Name (RMCF, Package ()
-        {
-            "XHC", 
-            Package (0x04)
-            {
-                "port-count", 
-                Buffer (0x04)
+                "XHC", 
+                Package (0x04)
                 {
-                     0x0D, 0x00, 0x00, 0x00                         
-                }, 
-
-                "ports", 
-                Package (0x10)
-                {
-                    "HS01", 
-                    Package (0x04)
+                    "port-count", 
+                    Buffer (0x04)
                     {
-                        "UsbConnector", 
-                        0x03, 
-                        "port", 
-                        Buffer (0x04)
-                        {
-                             0x01, 0x00, 0x00, 0x00                         
-                        }
+                         0x0D, 0x00, 0x00, 0x00                         
                     }, 
 
-                    "HS02", 
-                    Package (0x04)
+                    "ports", 
+                    Package (0x10)
                     {
-                        "UsbConnector", 
-                        0x03, 
-                        "port", 
-                        Buffer (0x04)
+                        "HS01", 
+                        Package (0x04)
                         {
-                             0x02, 0x00, 0x00, 0x00                         
-                        }
-                    }, 
+                            "UsbConnector", 
+                            0x03, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x01, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
 
-                    "HS03", 
-                    Package (0x04)
-                    {
-                        "UsbConnector", 
-                        Zero, 
-                        "port", 
-                        Buffer (0x04)
+                        "HS02", 
+                        Package (0x04)
                         {
-                             0x03, 0x00, 0x00, 0x00                         
-                        }
-                    }, 
+                            "UsbConnector", 
+                            0x03, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x02, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
 
-                    "HS05", 
-                    Package (0x04)
-                    {
-                        "UsbConnector", 
-                        0xFF, 
-                        "port", 
-                        Buffer (0x04)
+                        "HS03", 
+                        Package (0x04)
                         {
-                             0x05, 0x00, 0x00, 0x00                         
-                        }
-                    }, 
+                            "UsbConnector", 
+                            Zero, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x03, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
 
-                    "HS06", 
-                    Package (0x04)
-                    {
-                        "UsbConnector", 
-                        0xFF, 
-                        "port", 
-                        Buffer (0x04)
+                        "HS05", 
+                        Package (0x04)
                         {
-                             0x06, 0x00, 0x00, 0x00                         
-                        }
-                    }, 
+                            "UsbConnector", 
+                            0xFF, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x05, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
 
-                    "HS08", 
-                    Package (0x04)
-                    {
-                        "UsbConnector", 
-                        0xFF, 
-                        "port", 
-                        Buffer (0x04)
+                        "HS06", 
+                        Package (0x04)
                         {
-                             0x08, 0x00, 0x00, 0x00                         
-                        }
-                    }, 
+                            "UsbConnector", 
+                            0xFF, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x06, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
 
-                    "SSP1", 
-                    Package (0x04)
-                    {
-                        "UsbConnector", 
-                        0x03, 
-                        "port", 
-                        Buffer (0x04)
+                        "HS08", 
+                        Package (0x04)
                         {
-                             0x0A, 0x00, 0x00, 0x00                         
-                        }
-                    }, 
+                            "UsbConnector", 
+                            0xFF, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x08, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
 
-                    "SSP2", 
-                    Package (0x04)
-                    {
-                        "UsbConnector", 
-                        0x03, 
-                        "port", 
-                        Buffer (0x04)
+                        "SSP1", 
+                        Package (0x04)
                         {
-                             0x0B, 0x00, 0x00, 0x00                         
+                            "UsbConnector", 
+                            0x03, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x0A, 0x00, 0x00, 0x00                         
+                            }
+                        }, 
+
+                        "SSP2", 
+                        Package (0x04)
+                        {
+                            "UsbConnector", 
+                            0x03, 
+                            "port", 
+                            Buffer (0x04)
+                            {
+                                 0x0B, 0x00, 0x00, 0x00                         
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+        }
     }                              
 }
