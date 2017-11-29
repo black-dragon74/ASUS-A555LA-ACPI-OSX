@@ -74,7 +74,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (IALS, 0) // Set this to 1 if you want to inject a fake ALS (Ambient Light Sensor) device
         Name (IPLT, 0) // Set this to 1 if you want to inject "plugin-type" on CPU0
         Name (HSOA, 1) // Set this to 0 if you don't want to add FirstPollDelay for ACPIBatMgr || HSOA = High Sierra or above
-        Name (CFPD, 8000) // Change FirstPollDelay for ACPIBatteryManager here, only works if HSOA is set to 1.
+        // Name (CFPD, 8000) // Uncomment to change FirstPollDelay for ACPIBatteryManager here, only works if HSOA is set to 1.
         
         Method (_INI, 0)
         {
@@ -381,19 +381,26 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 {
                     Local0 = Package()
                     {
-                        "FirstPollDelay", 8000
+                        "FirstPollDelay", 4000
                     }
                     
                     // If CFPD exists, then change the value of FirstPollDelay wrt ANKD.CFPD
+                    External (\ANKD.CFPD, IntObj)
                     If (CondRefOf(\ANKD.CFPD))
                     {
                         CreateDWordField(DerefOf(Local0[1]), 0, CFPD)
                         CFPD = \ANKD.CFPD
+                        
+                        // A little bit of debug info
+                        Debug = "Injected custom FirstPollDelay for ACPIBatteryManager"
+                        Debug = \ANKD.CFPD
                     }
+                    Else
+                    {
+                        Debug = "Custom FirstPollDelay not found. Using default: 4000"
+                    }    
                     
-                    // Return the value, Generate a debug report too
-                    Debug = "Injected custom FirstPollDelay for ACPIBatteryManager"
-                    Debug = \ANKD.CFPD
+                    // Return the final package
                     Return (Local0)
                 }        
             }    
