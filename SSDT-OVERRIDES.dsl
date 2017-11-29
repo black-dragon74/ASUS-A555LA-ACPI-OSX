@@ -115,7 +115,10 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Method _STA renamed to XSTA in SSDT (SaSSDT)
         Scope (B0D3)
         {
-            Name (_STA, Zero)
+            If (\ANKD.PTYP != 2)
+            {
+                Name (_STA, Zero)
+            }    
         }
         
         // Disable bogus B0D4 device
