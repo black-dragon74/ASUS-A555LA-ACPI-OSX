@@ -569,7 +569,18 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Device (HDAU)
         {
             Name (_ADR, 0x00030000)  // _ADR: Address
-            Name (_STA, 0x0F) // _STA: Status
+            // HDAU is not needed on SKL/KBL
+            Method (_STA, 0)
+            {
+                If (\ANKD.PTYP == 2)
+                {
+                    Return (0)
+                }
+                Else
+                {
+                    Return (15) // macOS uses 0x0f (15) as default _STA for some reason.
+                }
+            }           
 
             Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
             {
