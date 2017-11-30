@@ -49,6 +49,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.LPCB.EC0.ECAV, MethodObj) // Check if EC (Embedded controller) is ready
     External (\_SB.PCI0.LPCB.EC0.ST83, MethodObj) // FAN values in bytes are stored here
     External (\_SB.PCI0.LPCB.EC0.TACH, MethodObj) // Returns FAN speed in RPM unit
+    External (\_SB.PCI0.LPCB.EC0.ECPU, FieldUnitObj) // Current CPU Temperature
     External (\_SB.PCI0.RP03, DeviceObj)
     External (\_SB.PCI0.RP04, DeviceObj)
     External (\_SB.PCI0.PDRC, DeviceObj)
@@ -844,6 +845,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         {
             "System Fan", "FAN0"
         })
+        
+        // Add package wrt ACPISensors
+        Name (TEMP, Package()
+        {
+            "CPU Heatsink", "TCPU"
+        })
+            
         Method (FAN0, 0)
         {
             // Check is EC is ready
@@ -868,7 +876,27 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             
             // Return 255, 0 or Fan RPM based on conditionals above
             Return (Local0)        
-        }           
+        }
+        
+        // Add method to handle CPU temperature
+        // Check if EC is ready
+        If (\_SB.PCI0.LPCB.EC0.ECAV())
+        {
+            Local0 = \_SB.PCI0.LPCB.EC0.ECPU
+            If (Local1 <128)
+            {
+                Local1 = Local0
+            }
+                
+        }
+        Else
+        {
+            // Terminate, return Zero
+            Local1 = 0
+        }
+        
+        // Return final CPU temp. ACPISensors take care of the conversion.
+        Return (Local1)                 
     } 
     
     // Inject proper USB config for A555LA
