@@ -885,6 +885,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             If (\_SB.PCI0.LPCB.EC0.ECAV())
             {
                 Local0 = \_SB.PCI0.LPCB.EC0.ECPU
+                Local1 = 60
                 If (Local0 < 128)
                 {
                     Local1 = Local0
