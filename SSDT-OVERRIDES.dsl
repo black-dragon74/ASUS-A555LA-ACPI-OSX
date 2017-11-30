@@ -42,13 +42,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.LPCB.ADBG, DeviceObj)
     External (\_SB.PCI0.LPCB.CWDT, DeviceObj)
     External (\_SB.PCI0.LPCB.DMAC, DeviceObj)
-    External (_SB_.PCI0.LPCB.EC0_.AH00, FieldUnitObj)
-    External (_SB_.PCI0.LPCB.EC0_.AH01, FieldUnitObj)
-    External (_SB_.PCI0.LPCB.EC0_.TAH0, FieldUnitObj) // If the battery fix is not applied import 16 bit register
     External (\_SB.PCI0.LPCB.FWHD, DeviceObj)
     External (\_SB.PCI0.LPCB.IPIC, DeviceObj)
     External (\_SB.PCI0.LPCB.LDRC, DeviceObj)
     External (\_SB.PCI0.LPCB.TIMR, DeviceObj)
+    External (\_SB.PCI0.LPCB.EC0.ECAV, MethodObj) // Check if EC (Embedded controller) is ready
+    External (\_SB.PCI0.LPCB.EC0.ST83, MethodObj) // FAN values in bytes are stored here
+    External (\_SB.PCI0.LPCB.EC0.TACH, MethodObj) // Returns FAN speed in RPM unit
     External (\_SB.PCI0.RP03, DeviceObj)
     External (\_SB.PCI0.RP04, DeviceObj)
     External (\_SB.PCI0.PDRC, DeviceObj)
@@ -69,7 +69,6 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Configurations for this SSDT, change according to your system
         Name (IUSB, 1)  // Change this to 0 if you don't have ASUS A555LA || IUSB = Inject USB
         Name (PTYP, 1) // Processor Type: Use 1 for Hasw/Bdw || 2 for SKL/KBL || PTYP = Processor Type
-        Name (BFXD, 1) // Set this to 0 if you have not applied the battery fix (Split registers larger than 8 bytes)
         Name (AUDL, 3) // Audio layout of your AppleHDA
         Name (IALS, 0) // Set this to 1 if you want to inject a fake ALS (Ambient Light Sensor) device
         Name (IPLT, 0) // Set this to 1 if you want to inject "plugin-type" on CPU0
@@ -847,38 +846,28 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         })
         Method (FAN0, 0)
         {
-            Local3=2974 // Just to supress warnings
-            Store (\ANKD.BFXD, Local2)
-            If (Local2 == 1)
+            // Check is EC is ready
+            If (\_SB.PCI0.LPCB.EC0.ECAV())
             {
-                Store (B1B2 (\_SB.PCI0.LPCB.EC0.AH00, \_SB.PCI0.LPCB.EC0.AH01), Local0) // Read value from two 8 bit registers
-            }
-            ElseIf (Local2 == 0)
-            {
-                Store (\_SB.PCI0.LPCB.EC0.TAH0, Local0) // Read value from 16bit register
+                // Continue
+                Local0 = \_SB.PCI0.LPCB.EC0.ST83(0)
+                If (Local0 == 255)
+                {
+                    Return (Local0)
+                }
+                
+                // Get RPM and store it in a var
+                Local0 = \_SB.PCI0.LPCB.EC0.TACH(0)
+                    
             }
             Else
             {
-                Store (0, _STA) // Turn off the device
+                // Terminate, return Zero
+                Local0 = 0
             }
-                    
-            If (LEqual (Local0, 0xFF))
-            {
-                Store (Zero, Local0)
-            }
-
-            If (Local0)
-            {
-                Multiply (Local0, 0x02, Local0)
-                Divide (0x0041CDB4, Local0, Local1, Local0)
-            }
-
-            If (CondRefOf(Local3))  // Just to supress warning
-            {
-                Store (Local1, Local3)
-            }    
-                
-            Return (Local0)
+            
+            // Return 255, 0 or Fan RPM based on conditionals above
+            Return (Local0)        
         }           
     } 
     
