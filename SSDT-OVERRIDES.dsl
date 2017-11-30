@@ -878,25 +878,28 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             Return (Local0)        
         }
         
-        // Add method to handle CPU temperature
-        // Check if EC is ready
-        If (\_SB.PCI0.LPCB.EC0.ECAV())
+        Method (TCPU, 0)
         {
-            Local0 = \_SB.PCI0.LPCB.EC0.ECPU
-            If (Local1 <128)
+            // Add method to handle CPU temperature
+            // Check if EC is ready
+            If (\_SB.PCI0.LPCB.EC0.ECAV())
             {
-                Local1 = Local0
-            }
+                Local0 = \_SB.PCI0.LPCB.EC0.ECPU
+                If (Local0 < 128)
+                {
+                    Local1 = Local0
+                }
                 
-        }
-        Else
-        {
-            // Terminate, return Zero
-            Local1 = 0
-        }
+            }
+            Else
+            {
+                // Terminate, return Zero
+                Local1 = 0
+            }
         
-        // Return final CPU temp. ACPISensors take care of the conversion.
-        Return (Local1)                 
+            // Return final CPU temp. ACPISensors take care of the conversion.
+            Return (Local1)
+        }                         
     } 
     
     // Inject proper USB config for A555LA
