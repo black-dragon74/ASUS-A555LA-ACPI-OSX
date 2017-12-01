@@ -46,6 +46,8 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.LPCB.IPIC, DeviceObj)
     External (\_SB.PCI0.LPCB.LDRC, DeviceObj)
     External (\_SB.PCI0.LPCB.TIMR, DeviceObj)
+    External (\_SB.PCI0.LPCB.EC0, DeviceObj) // For EC related queries
+    External (\_SB.PCI0.LPCB.PS2K, DeviceObj) // For brightness controls
     External (\_SB.PCI0.LPCB.EC0.ECAV, MethodObj) // Check if EC (Embedded controller) is ready
     External (\_SB.PCI0.LPCB.EC0.ST83, MethodObj) // FAN values in bytes are stored here
     External (\_SB.PCI0.LPCB.EC0.ST98, MethodObj) // Method that can acquire mutex and set FAN QMOD || QMOD = Max Allowed RPM of FAN
@@ -77,6 +79,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (HSOA, 1) // Set this to 0 if you don't want to add FirstPollDelay for ACPIBatMgr || HSOA = High Sierra or above
         // Name (CFPD, 8000) // Uncomment to change FirstPollDelay for ACPIBatteryManager here, only works if HSOA is set to 1.
         Name (ICFC, 1) // Use custom FAN control, set to 0 if you don't want it
+        Name (IBKP, 1) // Inject brightness key patch for ApplePS2SmartTouchpad, Set to 0 if you don't want to
         
         Method (_INI, 0)
         {
@@ -751,6 +754,27 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 }
                 
                 Return (Local1)                       
+            }
+            
+            // Check and add brightness related methods
+            // Renamed _Q0E to XQ0E and _Q0F to XQ0F in DSDT
+            Scope (EC0)
+            {
+                Method (_Q0E, 0)
+                {   
+                    If (\ANKD.IBKP != 0)
+                    {
+                        Notify (PS2K, 32)
+                    }    
+                }
+                     
+                Method (_Q0F, 0)
+                {
+                    If (\ANKD.IBKP != 0)
+                    {
+                        Notify (PS2K, 16)
+                    }    
+                }                
             }
         }
             
