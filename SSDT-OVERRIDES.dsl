@@ -75,7 +75,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (PTYP, 1) // Processor Type: Use 1 for Hasw/Bdw || 2 for SKL/KBL || PTYP = Processor Type
         Name (AUDL, 3) // Audio layout of your AppleHDA
         Name (IALS, 1) // Set this to 0 if you don't want to inject a fake ALS (Ambient Light Sensor) device
-        Name (IPLT, 0) // Set this to 1 if you want to inject "plugin-type" on CPU0
+        Name (IPLT, 1) // Set this to 1 if you want to inject "plugin-type" on CPU0
         Name (HSOA, 1) // Set this to 0 if you don't want to add FirstPollDelay for ACPIBatMgr || HSOA = High Sierra or above
         // Name (CFPD, 8000) // Uncomment to change FirstPollDelay for ACPIBatteryManager here, only works if HSOA is set to 1.
         Name (ICFC, 1) // Use custom FAN control, set to 0 if you don't want it
