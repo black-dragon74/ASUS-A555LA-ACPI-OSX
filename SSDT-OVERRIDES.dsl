@@ -306,34 +306,46 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     // Set ANKD.IPLT to 0 if you are injecting plugi type in config.plist
     Scope (\_PR.CPU0)
     {
-        // Check if we have to inject
-        If (\ANKD.IPLT != 0)
+        // Inject plugin related methods
+        Method (_DSM, 4)
         {
-            // Inject only if processor is haswell or above
-            // Not recommended of processor prior to haswell
-            If (\ANKD.PTYP == 1 || \ANKD.PTYP == 2)
+            // For debugging
+            Debug = "CPUPM: _DSM Called for CPU0"
+            
+            // If Arg2 is Zero return 0x03 as buffer
+            If (Arg2 == 0)
             {
-                Method (_DSM, 4)
+                Debug = "CPUPM: Arg2 found as Zero. Not injecting"
+                Return (Buffer()
                 {
-                    If (!Arg2)
-                    {
-                        Return (Package()
-                        {
-                            0x03
-                        })
-                    }
-                
-                    Return (Package()
-                    {
-                        "plugin-type", 1
-                    })            
-                }
-            }                
-        }
-        Else
-        {
-            // Do nothing
-        }        
+                    0x03
+                })
+            }
+            
+            // If IPLT is set to Zero, don't inject anything
+            If (\ANKD.IPLT == 0)
+            {
+                Debug = "CPUPM: IPLT set to zero in ANKD. Not injecting"
+                Return (0)
+            }
+            
+            // If Processor is above haswell, inject plugin-tpye on CPU0
+            If (\ANKD.PTYP >=1)
+            {
+                Debug = "CPUPM: Injected plugin-type on CPU0"
+                Return(Package()
+                {
+                    "plugin-type", 1
+                })
+            }
+            
+            // Else. don't inject
+            Else
+            {
+                Debug = "CPUPM: Processor not above haswell. Not Injecting"
+                Return (0)
+            }    
+        }                    
     }        
     
     Scope (\_SB)
