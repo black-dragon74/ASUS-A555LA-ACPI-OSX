@@ -13,8 +13,10 @@ function getFolderPath(){
 	fi
 }
 
+cpath=""
 inputValue="$1"
 downloadFolder=$(getFolderPath $inputValue)
+cFolder=kFolder=$downloadFolder/clover
 kFolder=$downloadFolder/kInstall
 tFolder=$downloadFolder/tInstall
 appFolder="/Applications"
@@ -24,8 +26,12 @@ daeFolder="/Library/LaunchDaemons"
 function extractKexts(){
 	echo -e "Kexts folder found. Extracting kexts.\n"
 	cd kexts
+	if [[ -e CLOVER.zip ]]; then
+		mv CLOVER.zip ../
+		echo "Moved CLOVER directory."
+	fi
 	for f in $(ls | grep "zip"); do
-		echo "Expanding $f" && sleep 0.5
+		echo "Expanding $f" && sleep 0.2
 		unzip -o -qu $f
 	done
 
@@ -74,6 +80,7 @@ function extractKexts(){
 	# Delete bogus stuffs
 	rm .DS_Store &>/dev/null
 	rm -rf __MACOSX &>/dev/null
+	rm -rf *.dSYM
 
 	# Check2 for kexts and other stuffs in main dir
 	for f in $(ls | grep "kext");
@@ -95,7 +102,7 @@ function extractTools(){
 	echo -e "\nDone with kexts. Proceeding to tools extraction.\n" && sleep 1
 	cd $downloadFolder/tools
 	for f in $(ls | grep "zip"); do
-		echo "Expanding $f" && sleep 0.5
+		echo "Expanding $f" && sleep 0.2
 		unzip -o -qu $f
 	done
 
@@ -114,12 +121,16 @@ function installKexts(){
 	cd $kFolder
 	
 	# Deal with normal kexts
-	normallist=$(ls | grep -vE "FakeSMC_|FakePCIID_|Lilu|IntelGraphicsFix")
+	normallist=$(ls | grep -vE "FakeSMC_|FakePCIID_|Lilu|IntelGraphicsFix|AppleALC|ATH9KFixup")
 	for f in $normallist;
 	do
 		sudo cp -rf $f $kextdir
 		echo Installed $f to $kextdir
-		rm -rf $f
+		if [[ $f != "FakeSMC.kext" ]]; then
+			if [[ $f != "ApplePS2SmartTouchPad.kext" ]]; then
+				rm -rf $f
+			fi
+		fi
 	done
 
 	# Deal with FakeSMC kext's plugins
@@ -158,7 +169,44 @@ function installKexts(){
 	# Remaning kexts are to be injected by bootloader
 	# TODO: Automate bootloader injection
 	echo
-	read -p "Please copy kexts in $kFolder to EFI/CLOVER/kexts/Other and press ENTER "
+	read -p "Please mount EFI partition and press ENTER "
+	if [ -e /Volumes/EFI/EFI/CLOVER ];
+		then
+		cpath=/Volumes/EFI/EFI/CLOVER
+	elif [ -e /Volumes/ESP/EFI/CLOVER ];
+		then
+		cpath=/Volumes/EFI/EFI/CLOVER
+	elif [ -e /Volumes/EFI\ 1/EFI/CLOVER ];
+		then
+		cpath=/Volumes/EFI/EFI/CLOVER
+	elif [ -e /Volumes/EFI\ 01/EFI/CLOVER ];
+		then
+		cpath=/Volumes/EFI/EFI/CLOVER
+	else
+		echo "EFI partition not mounted. Aborted."
+		exit
+	fi
+	echo "EFI Volume mounted at $cpath"
+	echo
+
+	# Copy kexts to CLOVER/Other
+	echo -e "Installing kexts to be injected by CLOVER\n"
+	if [[ -e $cpath/kexts/Other ]]; then
+		echo "Injection directory found."
+	else
+		echo "Injection directory not found. Creating."
+		mkdir $cpath/kexts/Other
+	fi
+
+	echo
+
+	injectlist=$(ls | grep "kext")
+	for f in $injectlist; do
+		cp -rf $f $cpath/kexts/Other
+		echo Injected $f && sleep 0.2
+		rm -rf $f
+	done
+
 	echo
 
 	# Finished
@@ -175,6 +223,7 @@ function installTools(){
 		for f in $applist; do
 			echo "Copied $f to $appFolder"
 			sudo cp -rf $f $appFolder
+			rm -rf $f
 		done
 	fi
 
@@ -184,6 +233,7 @@ function installTools(){
 		for f in $binlist; do
 			echo "Installed $f to $binFolder"
 			sudo cp -rf $f $binFolder
+			rm -rf $f
 		done
 	fi
 
@@ -193,6 +243,7 @@ function installTools(){
 		for f in $daelist; do
 			echo Installed $f to $daeFolder
 			sudo cp -rf $f $daeFolder
+			rm -rf $f
 		done
 	fi
 
@@ -208,6 +259,13 @@ function rebuildCacPer(){
 	sudo kextcache -i / &>/dev/null
 	echo -e "Done. Reboot and enjoy!"
 	exit
+}
+
+function setupClover(){
+	cd $cFolder
+	cp config.plist $cpath
+	cp HFSPlus.efi $cpath/drivers64UEFI
+	rm *
 }
 
 # Clear
@@ -304,6 +362,13 @@ installKexts
 echo -e "Proceeding to install tools...\n"
 installTools
 
+# Setup Clover
+echo -e "Setting up CLOVER..."
+setupClover
+echo -e "Clover is setup and ready to go!...\n"
+
 # Rebuild caches and fix permissions
 echo -e "Fixing permissions and rebuilding caches...\n"
 rebuildCacPer
+
+#EOF
