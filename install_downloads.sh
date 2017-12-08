@@ -331,14 +331,9 @@ else
 	kextdir="/System/Library/Extensions"
 fi
 
-# If 10.11 or less Lilu is not needed.
+# If 10.11 or less IntelGraphicsFixup is not needed.
 if [[ $swver -le "1011" ]]; then
 	cd $kFolder
-
-	#For LILU
-	if [[ -e Lilu.kext ]]; then
-		rm -rf Lilu.kext
-	fi
 
 	#For IntelGraphicsFixup
 	if [[ -e IntelGraphicsFixup.kext ]]; then
