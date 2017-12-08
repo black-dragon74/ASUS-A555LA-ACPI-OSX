@@ -36,6 +36,7 @@ download os-x-usb-inject-all RehabMan-USBInjectAll
 download lilu RehabMan-Lilu
 download intelgraphicsfixup RehabMan-IntelGraphicsFixup
 #download os-x-acpi-debug RehabMan-Debug
+download os-x-acpi-poller RehabMan-Poller
 cd ..
 
 # download tools
