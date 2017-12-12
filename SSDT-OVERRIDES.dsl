@@ -75,11 +75,11 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Configurations for this SSDT, change according to your system
         Name (IUSB, 1)  // Change this to 0 if you don't have ASUS A555LA || IUSB = Inject USB
         Name (PTYP, 1) // Processor Type: Use 1 for Hasw/Bdw || 2 for SKL/KBL || PTYP = Processor Type
-        Name (AUDL, 3) // Audio layout of your AppleHDA
+        Name (AUDL, 5) // Audio layout of your AppleHDA
         Name (IALS, 1) // Set this to 0 if you don't want to inject a fake ALS (Ambient Light Sensor) device
         Name (IPLT, 1) // Set this to 1 if you want to inject "plugin-type" on CPU0
         Name (HSOA, 1) // Set this to 0 if you don't want to add FirstPollDelay for ACPIBatMgr || HSOA = High Sierra or above
-        // Name (CFPD, 8000) // Uncomment to change FirstPollDelay for ACPIBatteryManager here, only works if HSOA is set to 1.
+        Name (CFPD, 6000) // Comment if you don't want FirstPollDelay for ACPIBatteryManager, only works if HSOA is set to 1.
         Name (ICFC, 1) // Use custom FAN control, set to 0 if you don't want it
         Name (IBKP, 1) // Inject brightness key patch for ApplePS2SmartTouchpad, Set to 0 if you don't want to
         
