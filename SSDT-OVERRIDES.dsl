@@ -82,6 +82,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Name (CFPD, 6000) // Comment if you don't want FirstPollDelay for ACPIBatteryManager, only works if HSOA is set to 1.
         Name (ICFC, 1) // Use custom FAN control, set to 0 if you don't want it
         Name (IBKP, 1) // Inject brightness key patch for ApplePS2SmartTouchpad, Set to 0 if you don't want to
+        Name (PRWT, 0x6D) //Change your _PRW type. It could be 0x0D if not 0x6D. ASUS uses 0x6D mostly
         
         Method (_INI, 0)
         {
@@ -452,6 +453,35 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 {
                     Return (Zero)
                 }
+                
+                // Return PRW as 0 instead of 3 to prevent instant wake
+                // Renamed _PRW to XPRW in DSDT
+                Method (_PRW, 0)
+                {
+                    // Set Local0 as Zero to return in case of invalid selection
+                    Local0 = 0
+                
+                    // If _PRW = 0x0D
+                    If (\ANKD.PRWT == 0x0D)
+                    {
+                        Local0=Package()
+                        {
+                            0x0D, 0
+                        }
+                    }
+                
+                    // If _PRW = 0x6D
+                    If (\ANKD.PRWT == 0x6D)
+                    {
+                        Local0=Package()
+                        {
+                            0x6D, 0
+                        }
+                    }
+                
+                    // Return the value as per conditionals above
+                    Return (Local0)                
+                }    
             }
         }
         
@@ -680,7 +710,6 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         //Device(HDEF)
         //{
         //    Name(_ADR, 0x001b0000)
-        //    Name(_PRW, Package() { 0x0d, 0x05 }) // may need tweaking (or not needed)
         //}
         
         // Add audio device properties. Make sure you have changed conflicting _DSM to XDSM in DSDT
@@ -721,6 +750,35 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 }
                 
                 // Return Local0 package (our device properties)
+                Return (Local0)                
+            }
+            
+            // Return PRW as 0 instead of 3 to prevent instant wake
+            // Renamed _PRW to XPRW in DSDT
+            Method (_PRW, 0)
+            {
+                // Set Local0 as Zero to return in case of invalid selection
+                Local0 = 0
+                
+                // If _PRW = 0x0D
+                If (\ANKD.PRWT == 0x0D)
+                {
+                    Local0=Package()
+                    {
+                        0x0D, 0
+                    }
+                }
+                
+                // If _PRW = 0x6D
+                If (\ANKD.PRWT == 0x6D)
+                {
+                    Local0=Package()
+                    {
+                        0x6D, 0
+                    }
+                }
+                
+                // Return the value as per conditionals above
                 Return (Local0)                
             }
         }        
@@ -852,6 +910,35 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Properties for EHCI are not injected as we have disabled the EHCI device
         Scope (XHC)
         {
+            // Return PRW as 0 instead of 3 to prevent instant wake
+            // Renamed _PRW to XPRW in DSDT
+            Method (_PRW, 0)
+            {
+                // Set Local0 as Zero to return in case of invalid selection
+                Local0 = 0
+                
+                // If _PRW = 0x0D
+                If (\ANKD.PRWT == 0x0D)
+                {
+                    Local0=Package()
+                    {
+                        0x0D, 0
+                    }
+                }
+                
+                // If _PRW = 0x6D
+                If (\ANKD.PRWT == 0x6D)
+                {
+                    Local0=Package()
+                    {
+                        0x6D, 0
+                    }
+                }
+                
+                // Return the value as per conditionals above
+                Return (Local0)                
+            }    
+            
             Method (_DSM, 4)
             {
                 If (!Arg2)
