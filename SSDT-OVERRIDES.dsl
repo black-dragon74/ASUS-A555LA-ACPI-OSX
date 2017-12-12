@@ -13,6 +13,8 @@
 // _STA to XSTA renames required in DSDT & SSDTs: DptfTabl, CpccTabl, SaSSDT
 // Serach for "Renamed" in this file to see OEM TABLE ID of SSDT in which you have to apply renames
 
+// If you get FAN RPM as 255 it means your FAN is at it's maximum speed
+
 // TODO: What this ssdt does
     
 DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
@@ -899,6 +901,8 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                 Local0 = \_SB.PCI0.LPCB.EC0.ST83(0)
                 If (Local0 == 255)
                 {
+                    // Store it in debug log
+                    Debug = "FAN0 is at maximum speed now"
                     Return (Local0)
                 }
                 
