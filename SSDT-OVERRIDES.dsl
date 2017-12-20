@@ -11,6 +11,7 @@
 
 // Meant specifically for ASUS A555LA, but, might work for other laptops
 // _STA to XSTA renames required in DSDT & SSDTs: DptfTabl, CpccTabl, SaSSDT
+// Renamed Device LID to LID0 manually in DSDT
 // Serach for "Renamed" in this file to see OEM TABLE ID of SSDT in which you have to apply renames
 
 // If you get FAN RPM as 255 it means your FAN is at it's maximum speed
@@ -43,11 +44,6 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
     External (\_SB.PCI0.SMB0, DeviceObj) // Requires rename of BAT0 to SMB0
     External (\_SB.PCI0.LPCB.ADBG, DeviceObj)
     External (\_SB.PCI0.LPCB.CWDT, DeviceObj)
-    External (\_SB.PCI0.LPCB.DMAC, DeviceObj)
-    External (\_SB.PCI0.LPCB.FWHD, DeviceObj)
-    External (\_SB.PCI0.LPCB.IPIC, DeviceObj)
-    External (\_SB.PCI0.LPCB.LDRC, DeviceObj)
-    External (\_SB.PCI0.LPCB.TIMR, DeviceObj)
     External (\_SB.PCI0.LPCB.EC0, DeviceObj) // For EC related queries
     External (\_SB.PCI0.LPCB.PS2K, DeviceObj) // For brightness controls
     External (\_SB.PCI0.LPCB.EC0.ECAV, MethodObj) // Check if EC (Embedded controller) is ready
@@ -115,7 +111,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         Scope (TPM)
         {
             Name (_STA, Zero)
-        }            
+        }             
     }        
         
     Scope (\_SB.PCI0)
@@ -214,7 +210,6 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         
         Scope (LPCB)
         {
-            // Disable unwanted ADBG device
             Scope (ADBG)
             {
                 Name (_STA, Zero)
@@ -226,37 +221,7 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             {
                 Name (_STA, Zero)
             }
-            
-            // Disable unwanted DMAC device
-            Scope (DMAC)
-            {
-                Name (_STA, Zero)
-            }
-            
-            // Disable unwanted FWHD device
-            Scope (FWHD)
-            {
-                Name (_STA, Zero)
-            }
-            
-            // Disable unwated IPIC device
-            Scope (IPIC)
-            {
-                Name (_STA, Zero)
-            }
-            
-            // Disable unwanted LDRC device
-            Scope (LDRC)
-            {
-                Name (_STA, Zero)
-            }
-            
-            // Disable unwanted TIMR device
-            Scope (TIMR)
-            {
-                Name (_STA, Zero)
-            }
-            
+                        
             // Disable EHCI controller
             OperationRegion (ANP1, PCI_Config, 0xF0, 0x04)
             Field (ANP1, DWordAcc, NoLock, Preserve)
@@ -358,6 +323,12 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
             Name (_HID, "EC000000")
         }
         
+        // Add Power Button with compatible ID
+        Device (PWRB)
+        {
+            Name (_HID, EisaId ("PNP0C0C"))  // _HID: Hardware ID
+        }
+        
         // Inject ALS device
         Device (ALS)
         {
@@ -395,6 +366,13 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
         // Add FirstPollDelay for ACPIBatteryManager on HighSierra+
         Scope (SMB0)
         {
+            // Inject SBS0 as found in MacBook Air 2017
+            Device (SBS0)
+            {
+                Name (_HID, "ACPI0002")  // _HID: Hardware ID
+                Name (_SBS, 0x01)  // _SBS: Smart Battery Subsystem
+            }    
+            
             Method (RMCF, 0)
             {
                 Local0 = Package()
@@ -578,6 +556,29 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                     }
                 })
             }
+            
+            // Add MEM2 device as found on MacBook Air 2017
+            // Not renamed, removed MEM2 Device in SaSsdt
+            Device (\_SB.MEM2)
+            {
+                Name (_HID, EisaId ("PNP0C01"))  // _HID: Hardware ID
+                Name (_UID, 0x02)  // _UID: Unique ID
+                Name (CRS, ResourceTemplate ()
+                {
+                    Memory32Fixed (ReadWrite,
+                        0x20000000,         // Address Base
+                        0x00200000,         // Address Length
+                        )
+                    Memory32Fixed (ReadWrite,
+                        0x40000000,         // Address Base
+                        0x00200000,         // Address Length
+                        )
+                })
+                Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
+                {
+                    Return (CRS)
+                }
+            }    
             
             // Inject PNLF device for AppleBacklight
             // Based on RehabMan's PNLF
@@ -848,6 +849,24 @@ DefinitionBlock("SSDT-OVERRIDES", "SSDT", 2, "Nick", "AsusOpt", 0)
                     }    
                 }                
             }
+            
+            // Renamed, not renamed, removed MATH device from DSDT
+            // Add MATH device as found on MacBook Air 2017
+            Device (MATH)
+            {
+                Name (_HID, EisaId ("PNP0C04"))  // _HID: Hardware ID
+                Name (_CRS, ResourceTemplate ()  // _CRS: Current Resource Settings
+                {
+                    IO (Decode16,
+                        0x00F0,             // Range Minimum
+                        0x00F0,             // Range Maximum
+                        0x01,               // Alignment
+                        0x01,               // Length
+                        )
+                    IRQNoFlags ()
+                        {13}
+                })
+            }    
         }
             
         // Add SMBUS device compatible properties
